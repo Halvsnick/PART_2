@@ -12,6 +12,7 @@ MapaRender::MapaRender() {
     this->m_mapaBase = new MapaSolucio();
 }
 
+
 // DO NOT TOUCH THIS
 std::vector<WayBridge> MapaRender::renderWays() {
     std::vector<WayBridge> renderedWays = {};
