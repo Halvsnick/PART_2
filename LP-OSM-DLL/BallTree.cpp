@@ -1,6 +1,7 @@
 #include"pch.h"
 #include "BallTree.h"
 
+
 void BallTree::construirArbre(const std::vector<Coordinate>& coordenades) {
     // TODO: Utilitza aquest metode per construir el teu BallTree
     // TODO: amb les coordenades que se us passen per parametre
@@ -8,6 +9,7 @@ void BallTree::construirArbre(const std::vector<Coordinate>& coordenades) {
    //anar agafant els camins un per un i afegir totes les coordenades en un greaf de coordinate 
     //nose si fer un graf o una llista desordenada i despres ja apanyarme *mirar 
 
+   
 
 }
 
