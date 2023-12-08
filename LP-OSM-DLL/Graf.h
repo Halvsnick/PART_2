@@ -57,15 +57,19 @@ public:
       
     void CrearGraf(vector<CamiBase*>& m_Ways)
     {
-        // Aquí debes implementar la lógica para crear el grafo utilizando los CamiBase de m_Ways
+       
         for (CamiBase* way : m_Ways) {
             vector<Coordinate> coords = way->getCamiCoords();
+
+            // Agregar los nodos al grafo
             for (const auto& coord : coords) {
-                addNode(coord); // Agrega las coordenadas al grafo
+                addNode(coord); // Agregar el nodo al grafo
             }
 
-            //conectar arestes
-        
+            // Conectar los nodos como aristas
+            for (size_t i = 0; i < coords.size() - 1; ++i) {
+                afegirAresta(coords[i + 1]); // Conectar el nodo actual con el siguiente
+            }
         }
 
     }
