@@ -2,60 +2,76 @@
 #include <iostream>
 #include <vector>
 #include "MapaSolucio.h"
+#include "PuntDeInteresBase.h"
 
 using namespace std;
 
-// Definición de un grafo utilizando una lista de adyacencia
-class Graph : public MapaSolucio
-{
+class Graph : public MapaSolucio {
 private:
-    int V; // Número de nodos en el grafo
-    vector<vector<int>> adjacencyList; // Lista de adyacencia
+
+    int VoW; // Número de vértices o ways
+    vector<vector<Coordinate>> W_graf; // Grafo con ways
 
     vector<PuntDeInteresBase*> m_WoPI;
     vector<CamiBase*> m_Ways;
-    vector<string> m_Punts_id;
+
+    int findNodeIndex(const Coordinate& coord) {
+        for (int i = 0; i < W_graf.size(); ++i) {
+            if (W_graf[i][0].lat == coord.lat && W_graf[i][0].lon == coord.lon) {
+                return i; // Retorna el índice del nodo si se encuentra la coordenada
+            }
+        }
+        return -1; // Retorna -1 si no se encuentra la coordenada
+    }
 
 public:
-    // Constructor que inicializa el grafo con V nodos
-    Graph(int vertices) : V(vertices) {
-        adjacencyList.resize(V); // Inicializa la lista de adyacencia con V elementos
+    Graph() : VoW(0) {}
+
+    void addNode(Coordinate node) 
+    {
+        if (find(W_graf.begin(), W_graf.end(), node) == W_graf.end()) // El nodo no está presente, así que lo añadimos al grafo
+        {
+            VoW++; // Incrementa el número de nodos en el grafo
+            W_graf.resize(VoW); // Añade un nuevo vector vacío para el nuevo nodo
+            W_graf.push_back({ node }); // Agrega la coordenada como un nuevo vector en el grafo
+        }
+       
     }
 
-    // Función para agregar una arista entre dos nodos
-    void addEdge(int u, int v) {
-        adjacencyList[u].push_back(v); // Agrega v a la lista de adyacencia de u
-        adjacencyList[v].push_back(u); // Para un grafo no dirigido, agregar u a la lista de v
-    }
+    void afegirAresta(const Coordinate& aresta)
+    {
+        // Obtiene los nodos asociados a la arista y añade conexiones al grafo
+        int index = findNodeIndex(aresta);
 
-    // Función para imprimir el grafo
-    void printGraph() {
-        for (int i = 0; i < V; ++i) {
-            cout << "Nodo " << i << " conectado con: ";
-            for (int j = 0; j < adjacencyList[i].size(); ++j) {
-                cout << adjacencyList[i][j] << " ";
+        if (index != -1)
+        {
+            // Añade una conexión desde la nueva arista a los nodos existentes en el grafo
+            for (int i = 0; i < W_graf.size(); ++i) {
+                if (i != index) {
+                    W_graf[i].push_back(aresta); // Conecta la arista con el nodo existente
+                    W_graf[index].push_back(W_graf[i][0]); // Conecta el nodo existente con la arista
+                }
             }
-            cout << endl;
         }
     }
+      
+    void CrearGraf(vector<CamiBase*>& m_Ways)
+    {
+        // Aquí debes implementar la lógica para crear el grafo utilizando los CamiBase de m_Ways
+        for (CamiBase* way : m_Ways) {
+            vector<Coordinate> coords = way->getCamiCoords();
+            for (const auto& coord : coords) {
+                addNode(coord); // Agrega las coordenadas al grafo
+            }
+
+            //conectar arestes
+        
+        }
+
+    }
+
 };
 
-int main() {
-    // Crear un grafo utilizando vectores
-    int numNodes = 5; // Por ejemplo, un grafo con 5 nodos
 
-    Graph graph(numNodes);
 
-    // Agregar aristas al grafo
-    graph.addEdge(0, 1);
-    graph.addEdge(0, 2);
-    graph.addEdge(1, 3);
-    graph.addEdge(2, 4);
-
-    // Imprimir el grafo
-    cout << "Representación del grafo:" << endl;
-    graph.printGraph();
-
-    return 0;
-}
 
