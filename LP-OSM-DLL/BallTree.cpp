@@ -1,4 +1,5 @@
 #include "BallTree.h"
+#include "pch.h"
 
 void BallTree::construirArbre(const std::vector<Coordinate>& coordenades)
 {
@@ -220,8 +221,3 @@ Coordinate BallTree::nodeMesProper(Coordinate targetQuery, Coordinate& Q, BallTr
 
     return Q;
 }
-
-
-
-
-
