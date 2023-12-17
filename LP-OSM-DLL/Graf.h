@@ -1,79 +1,34 @@
 #pragma once
-#include <iostream>
-#include <vector>
-#include "MapaSolucio.h"
-#include "PuntDeInteresBase.h"
+#include "Util.h"
+#include "Common.h"
+#include "CamiSolució.h"
+#include <queue>
+#include <stack>
+#include <list>
+#include <limits>
 
-using namespace std;
-
-class Graph : public MapaSolucio {
-private:
-
-    int VoW; // Número de vértices o ways
-    vector<vector<Coordinate>> W_graf; // Grafo con ways
-
-    vector<PuntDeInteresBase*> m_WoPI;
-    vector<CamiBase*> m_Ways;
-
-    int findNodeIndex(const Coordinate& coord) {
-        for (int i = 0; i < W_graf.size(); ++i) {
-            if (W_graf[i][0].lat == coord.lat && W_graf[i][0].lon == coord.lon) {
-                return i; // Retorna el índice del nodo si se encuentra la coordenada
-            }
-        }
-        return -1; // Retorna -1 si no se encuentra la coordenada
-    }
-
+class GrafSolucio
+{
 public:
-    Graph() : VoW(0) {}
+	GrafSolucio() : m_numNodes(0) { DISTMAX = std::numeric_limits<double>::max(); }
 
-    void addNode(Coordinate node) 
-    {
-        if (find(W_graf.begin(), W_graf.end(), node) == W_graf.end()) // El nodo no está presente, así que lo añadimos al grafo
-        {
-            VoW++; // Incrementa el número de nodos en el grafo
-            W_graf.resize(VoW); // Añade un nuevo vector vacío para el nuevo nodo
-            W_graf.push_back({ node }); // Agrega la coordenada como un nuevo vector en el grafo
-        }
-       
-    }
+	void clear();
 
-    void afegirAresta(const Coordinate& aresta)
-    {
-        // Obtiene los nodos asociados a la arista y añade conexiones al grafo
-        int index = findNodeIndex(aresta);
+	void afegirNode(const Coordinate& coord1);
+	void afegirAresta(const Coordinate& coord1, const Coordinate& coord2);
 
-        if (index != -1)
-        {
-            // Añade una conexión desde la nueva arista a los nodos existentes en el grafo
-            for (int i = 0; i < W_graf.size(); ++i) {
-                if (i != index) {
-                    W_graf[i].push_back(aresta); // Conecta la arista con el nodo existente
-                    W_graf[index].push_back(W_graf[i][0]); // Conecta el nodo existente con la arista
-                }
-            }
-        }
-    }
-      
-    void CrearGraf(vector<CamiBase*>& m_Ways)
-    {
-       
-        for (CamiBase* way : m_Ways) {
-            vector<Coordinate> coords = way->getCamiCoords();
+	size_t trobarPosicio(const Coordinate& coord);
 
-            // Agregar los nodos al grafo
-            for (const auto& coord : coords) {
-                addNode(coord); // Agregar el nodo al grafo
-            }
+	size_t minDistance(const std::vector<double>& dist, const std::vector<bool>& visited) const;
+	void dijkstra(size_t node1, size_t node2, std::vector<double>& dist, std::vector<size_t>& anterior);
 
-            // Conectar los nodos como aristas
-            for (size_t i = 0; i < coords.size() - 1; ++i) {
-                afegirAresta(coords[i + 1]); // Conectar el nodo actual con el siguiente
-            }
-        }
+	void camiMesCurt(const Coordinate& desde, const Coordinate& a, std::stack<Coordinate>& cami);
 
-    }
-
+private:
+	std::vector<Coordinate> m_nodes;
+	std::vector<std::vector<double>> m_matriuAdj;
+	size_t m_numNodes;
+	double DISTMAX;
 };
 
 

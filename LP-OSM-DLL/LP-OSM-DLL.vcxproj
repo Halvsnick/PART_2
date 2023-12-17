@@ -189,6 +189,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PuntDeInteresBase.cpp" />
+    <ClCompile Include="Graf.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="XML4OSMUtil.cpp" />
   </ItemGroup>

@@ -1,19 +1,27 @@
-#pragma once
+#include "MapaBase.h"
 #include "PuntInteresBotiga.h"
 #include "PuntInteresRestaurant.h"
 #include "CamiSolució.h"
+
 #include "Util.h"
+#include "BallTree.h"
+#include "Graf.h"
 
 using namespace std;
 
-class MapaSolucio : public MapaBase {													//MapaSolucio derivada de MapaBase
+class MapaSolucio : public MapaBase 
+{										//MapaSolucio derivada de MapaBase
 private:
-
+	// TODO: Afegeix els atributs que creguis necessaris per aquest MapaSolucio
 	vector<PuntDeInteresBase*> m_WoPI;
 	vector<CamiBase*> m_Ways;
 	vector<string> m_Punts_id;
+	vector<Coordinate> m_caminsNode;
+	GrafSolucio m_graf;
 
 public:
+	MapaSolucio() {}
+	~MapaSolucio() {}
 
 	void getPdis(vector<PuntDeInteresBase*>& PuntsInteres)
 	{ 
@@ -158,9 +166,93 @@ public:
 		}
 	}
 
+	void construeixGraf()
+	{
+		// Esborra el contingut del graf existent
+		m_graf.clear();
+
+		// Itera a través de tots els camins
+		for (size_t i = 0; i < m_Ways.size(); i++)
+		{
+			// Obtenir les coordenades del camí actual
+			std::vector<Coordinate> coords = m_Ways[i]->getCamiCoords();
+
+			// Itera a través de les coordenades del camí
+			for (size_t j = 0; j < coords.size(); j++)
+			{
+				bool existeix = false;
+
+				// Comprova si aquesta coordenada ja existeix al graf
+				for (const Coordinate& uniqueNode : m_caminsNode)
+				{
+					if (uniqueNode.lat == coords[j].lat && uniqueNode.lon == coords[j].lon)
+					{
+						existeix = true;
+						break;
+					}
+				}
+
+				// Si la coordenada no existeix, l'afegeix al conjunt de nodes del graf
+				if (!existeix)
+					m_caminsNode.push_back(coords[j]);
+			}
+		}
+
+		// Afegeix tots els nodes al graf
+		for (size_t i = 0; i < m_caminsNode.size(); i++)
+		{
+			m_graf.afegirNode(m_caminsNode[i]);
+		}
+
+		// Afegeix totes les arestes al graf
+		for (size_t i = 0; i < m_Ways.size(); i++)
+		{
+			std::vector<Coordinate> coords = m_Ways[i]->getCamiCoords();
+
+			// Afegeix una aresta entre cada parell consecutiu de coordenades
+			for (size_t j = 0; j < coords.size() - 1; j++)
+				m_graf.afegirAresta(coords[j], coords[j + 1]);
+		}
+	}
+
 	CamiBase* buscaCamiMesCurt(PuntDeInteresBase* desde, PuntDeInteresBase* a)
 	{
-		return nullptr;
+		// Construeix el graf amb els camins disponibles
+		construeixGraf();
+
+		// Obtenir les coordenades dels punts d'inici i final
+		Coordinate coordDesde = desde->getCoord();
+		Coordinate coordA = a->getCoord();
+
+		// Variables per emmagatzemar els nodes més propers als punts d'inici i final
+		Coordinate QDesde, QA;
+
+		// Construeix un arbre de Bola per accelerar la cerca del node més proper
+		BallTree* ballTree = new BallTree();
+		ballTree->construirArbre(m_caminsNode);
+
+		// Troba el node més proper als punts d'inici i final utilitzant l'arbre de Bola
+		ballTree->nodeMesProper(coordDesde, QDesde, ballTree->getArrel());
+		ballTree->nodeMesProper(coordA, QA, ballTree->getArrel());
+
+		// Utilitza l'algorisme del camí més curt al graf per trobar el camí entre QDesde i QA
+		std::stack<Coordinate> coords;
+		m_graf.camiMesCurt(QDesde, QA, coords);
+
+		// Inverteix l'ordre de les coordenades per obtenir el camí correcte
+		std::vector<Coordinate> way;
+		size_t mida = coords.size();
+
+		for (size_t i = 0; i < mida; i++)
+		{
+			way.push_back(coords.top());
+			coords.pop();
+		}
+
+		// Crea un objecte de camí de solució amb les coordenades del camí
+		CamiSolucio* cami = new CamiSolucio(way);
+
+		return cami;
 	}
 };
 

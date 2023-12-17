@@ -16,5 +16,3 @@ class MapaBase {
 		virtual CamiBase* buscaCamiMesCurt(PuntDeInteresBase* desde, PuntDeInteresBase* a) = 0;
 };
 
-
-
